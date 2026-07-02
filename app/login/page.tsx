@@ -31,14 +31,16 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // ✅ រក្សាទុក Token ចូលទៅក្នុង localStorage ម៉ាស៊ីនអ្នកប្រើប្រាស់
+        // ✅ រក្សាទុក Token ចូលទៅក្នុង localStorage
         localStorage.setItem("token", data.access_token);
+        
+        // 🛠️ ✅ ថែមបន្ទាត់នេះ៖ រក្សាទុកឈ្មោះពិតប្រាកដដែល User បានវាយបញ្ចូល (Username) ទៅក្នុង localStorage
+        localStorage.setItem("username", username);
         
         alert("ចូលប្រើប្រាស់បានជោគជ័យ! 🔑");
         
-        // រុញទៅទំព័រដើម រួចបង្ខំឱ្យ Refresh មួយដងដើម្បីឱ្យ Navbar ទាញយកកន្ត្រកទំនិញមកបង្ហាញ
-        router.push("/");
-        setTimeout(() => window.location.reload(), 500);
+        // 🚀 ប្តូរមកប្រើវិធីនេះ ដើម្បីនាំទៅទំព័រដើម និងបង្ខំឱ្យ Header ទាញឈ្មោះថ្មីមកបង្ហាញភ្លាមៗដាច់ណាត់
+        window.location.href = "/";
       } else {
         setError(data.detail || "ឈ្មោះអ្នកប្រើ ឬ លេខកកូដសម្ងាត់មិនត្រឹមត្រូវទេ");
       }

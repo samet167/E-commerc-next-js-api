@@ -28,24 +28,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 }
 
-// 🏗️ ✨ Component Header ថ្មី ស្អាតប្លែកភ្នែក
+// 🏗️ ✨ Component Header កែសម្រួលប្រព័ន្ធទាញទិន្នន័យ Login ត្រឹមត្រូវ
 function HeaderContent() {
   const { cartCount } = useCart(); 
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(""); // ◄ ✅ ដំបូងទុកឱ្យទទេស្អាតសិន
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // 💡 ដំណើរការតែនៅលើ Client-side ពេល Component រួចរាល់
     const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
+    const storedUsername = localStorage.getItem("username"); // ◄ ✅ ចាប់យកឈ្មោះពិតពី LocalStorage
 
-    // 💡 សន្មតថាយើងទាញឈ្មោះមកបង្ហាញ (អាចកែសម្រួលតាម Logic ជាក់ស្តែងរបស់អ្នក)
     if (token) {
-      setUsername("សាម៉េត (samet)"); 
+      setIsLoggedIn(true);
+      // ✅ បើមានឈ្មោះពិតក្នុងប្រព័ន្ធ ឱ្យបង្ហាញឈ្មោះពិត បើអត់ទេទើបដាក់ "User" ឬ "សាម៉េត"
+      setUsername(storedUsername || "User"); 
+    } else {
+      setIsLoggedIn(false);
+      setUsername("");
     }
 
-    // ចុចក្រៅ Dropdown ឱ្យវាបិទទៅវិញស្វ័យប្រវត្តិ
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDropdown(false);
@@ -57,10 +61,12 @@ function HeaderContent() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("username"); // ◄ ✅ លុបឈ្មោះចេញពេល Logout
     setIsLoggedIn(false);
+    setUsername("");
     setShowDropdown(false);
     alert("បានចាកចេញពីគណនីជោគជ័យ! 🔒");
-    window.location.reload(); 
+    window.location.href = "/"; 
   };
 
   return (
@@ -72,18 +78,18 @@ function HeaderContent() {
           K<span className="text-gray-800 font-light">-</span>Store
         </Link>
         
-        {/* របារ Menu និងប៊ូតុង Login/Logout */}
-        <nav className="flex items-center space-x-6 text-sm font-semibold">
-          <Link href="/" className="text-gray-600 hover:text-blue-600 transition py-2">
+        {/* របារ Menu */}
+        <nav className="flex items-center space-x-6 text-sm font-semibold h-full">
+          <Link href="/" className="text-gray-600 hover:text-blue-600 transition flex items-center h-full">
             ទំព័រដើម
           </Link>
-          <Link href="/products" className="text-gray-600 hover:text-blue-600 transition py-2">
+          <Link href="/products" className="text-gray-600 hover:text-blue-600 transition flex items-center h-full">
             ផលិតផល
           </Link>
 
           {/* 🛒 កន្ត្រកទំនិញ */}
-          <Link href="/cart" className="relative p-2.5 bg-gray-50 rounded-xl hover:bg-gray-100 transition border border-gray-100">
-            <span className="text-lg">🛒</span>
+          <Link href="/cart" className="relative p-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition border border-gray-100 flex items-center justify-center">
+            <span className="text-lg leading-none">🛒</span>
             {cartCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black shadow-md border-2 border-white animate-pulse">
                 {cartCount}
@@ -91,54 +97,58 @@ function HeaderContent() {
             )}
           </Link>
 
-          {/* 🔐 ផ្នែកគ្រប់គ្រងការ Login / Logout */}
-          {isLoggedIn ? (
-            <div className="relative" ref={dropdownRef}>
-              {/* ប៊ូតុង Profile ពេល Login រួច */}
-              <button 
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition"
-              >
-                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
-                  👤
-                </div>
-                <span className="text-gray-700 text-xs hidden sm:inline-block max-w-[100px] truncate">
-                  {username}
-                </span>
-                <span className="text-[10px] text-gray-400">▼</span>
-              </button>
-
-              {/* 🛑 Dropdown Menu បង្ហាញជម្រើសលម្អិត */}
-              {showDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50">
-                  <div className="px-4 py-2 text-xs border-b border-gray-50 text-gray-400 font-normal">
-                    គណនី៖ {username}
+          {/* 🔐 ផ្នែកបង្ហាញឈ្មោះអតិថិជនដែលបាន Login */}
+          <div className="flex items-center">
+            {isLoggedIn && username ? ( // ◄ ✅ ពិនិត្យមើលទាល់តែដឹងថាបាន Login និងមានឈ្មោះទើបបង្ហាញ UI នេះ
+              <div className="relative" ref={dropdownRef}>
+                <button 
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition h-9 focus:outline-none"
+                >
+                  <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shadow-sm">
+                    👤
                   </div>
-                  <Link 
-                    href="/cart" 
-                    onClick={() => setShowDropdown(false)}
-                    className="block px-4 py-2 text-gray-600 hover:bg-gray-50 text-xs transition"
-                  >
-                    📦 ប្រវត្តិបញ្ជាទិញ
-                  </Link>
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full text-left block px-4 py-2 text-red-600 hover:bg-red-50 text-xs font-bold transition border-t border-gray-50"
-                  >
-                    🚫 ចាកចេញ (Logout)
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            /* ប៊ូតុង Login ករណីមិនទាន់មានគណនី */
-            <Link 
-              href="/login" 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition shadow-sm hover:shadow active:scale-95 duration-150"
-            >
-              ចូលប្រើ (Login)
-            </Link>
-          )}
+                  {/* ✍️ លោតឈ្មោះអ្នក Login ពិតប្រាកដនៅត្រង់នេះ */}
+                  <span className="text-gray-700 text-xs font-bold max-w-[100px] truncate leading-none">
+                    {username}
+                  </span>
+                  <span className="text-[9px] text-gray-400">▼</span>
+                </button>
+
+                {/* Dropdown Menu */}
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="px-4 py-2 text-[11px] border-b border-gray-50 text-gray-400 font-normal truncate">
+                      គណនី៖ {username}
+                    </div>
+                    <Link 
+                      href="/cart" 
+                      onClick={() => setShowDropdown(false)}
+                      className="block px-4 py-2 text-gray-600 hover:bg-gray-50 text-xs transition"
+                    >
+                      📦 ប្រវត្តិបញ្ជាទិញ
+                    </Link>
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full text-left block px-4 py-2 text-red-600 hover:bg-red-50 text-xs font-bold transition border-t border-gray-50"
+                    >
+                      🚫 ចាកចេញ (Logout)
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : !isLoggedIn ? ( // ◄ ✅ បង្ហាញប៊ូតុង Login តែក្នុងករណីមិនទាន់មានការ Login ប៉ុណ្ណោះ
+              <Link 
+                href="/login" 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-xl text-xs font-bold transition shadow-sm hover:shadow flex items-center justify-center h-9 active:scale-95 duration-150"
+              >
+                ចូលប្រើ (Login)
+              </Link>
+            ) : (
+              /* ករណីកំពុង Loading ទាញទិន្នន័យ (រារាំងកុំឱ្យ UI រេ) */
+              <div className="h-9 w-20 bg-gray-100 rounded-xl animate-pulse" />
+            )}
+          </div>
         </nav>
 
       </div>
