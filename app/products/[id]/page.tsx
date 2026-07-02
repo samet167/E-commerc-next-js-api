@@ -1,66 +1,91 @@
-import { productService } from "@/services/product.service";
-import ProductImage from "@/components/ProductImage";
-import Link from "next/link";
+"use client";
 
-interface PageProps {
-  params: Promise<{ id: string }>;
+import { useCart } from "@/context/CartContext";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+
+// កំណត់ប្រភេទលក្ខណៈទិន្នន័យរបស់ Item
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  image: string;
 }
 
-export default async function ProductDetailPage({ params }: PageProps) {
-  const { id } = await params;
-  let product = null;
-  let error = null;
+export default function ProductDetailPage() {
+  const { id } = useParams(); // ◄ ចាប់យកលេខ ID ពី URL (ឧទាហរណ៍៖ /products/1)
+  const { addToCart } = useCart();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    product = await productService.getProductById(id);
-  } catch (err) {
-    error = "មិនអាចទាញយកព័ត៌មានផលិតផលនេះបានទេ ឬរកមិនឃើញឡើយ។";
-  }
+  // ហៅទៅកាន់ FastAPI Backend ដើម្បីទាញយកទិន្នន័យទំនិញតាម ID ជាក់ស្តែង
+  useEffect(() => {
+    if (!id) return;
+    
+    fetch(`http://127.0.0.1:8000/items/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("រកមិនឃើញទំនិញនេះទេ");
+        return res.json();
+      })
+      .then((data) => {
+        setProduct(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [id]);
 
-  if (error || !product) {
-    return (
-      <div className="text-center py-20">
-        <p className="text-red-500 font-medium mb-4">{error}</p>
-        <Link href="/products" className="text-blue-600 hover:underline">ត្រឡប់ទៅកាន់បញ្ជីផលិតផល</Link>
-      </div>
-    );
-  }
+  if (loading) return <div className="text-center p-10">កំពុងទាញយកទិន្នន័យ...</div>;
+  if (!product) return <div className="text-center p-10 text-red-500">រកមិនឃើញផលិតផលឡើយ!</div>;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 max-w-4xl mx-auto shadow-sm">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* រូបភាព */}
-        <div className="bg-gray-50 rounded-xl overflow-hidden h-80 md:h-96">
-          <ProductImage src={product.image} alt={product.name} />
-        </div>
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-md flex gap-8 items-center my-10">
+      {/* ផ្នែករូបភាព - ទាញចេញពី URL ពេញលេញដែលផ្តល់ដោយ FastAPI */}
+      <div className="w-1/2 bg-gray-100 p-4 rounded-lg flex justify-center">
+        <img 
+          src={product.image} 
+          alt={product.name} 
+          className="max-h-80 object-contain rounded-lg"
+        />
+      </div>
 
-        {/* ព័ត៌មាន */}
-        <div className="flex flex-col justify-between">
-          <div className="space-y-4">
-            <span className="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-md font-semibold inline-block">
-              {product.category.name}
-            </span>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{product.name}</h1>
-            <div className="text-2xl font-extrabold text-gray-900">${product.price}</div>
-            <p className="text-gray-600 text-sm leading-relaxed">{product.description}</p>
-          </div>
+      {/* ផ្នែកព័ត៌មានទំនិញ */}
+      <div className="w-1/2 space-y-4">
+        <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
+        <p className="text-2xl font-semibold text-gray-900">${product.price}</p>
+        <p className="text-gray-500">{product.description}</p>
 
-          <div className="pt-6 border-t border-gray-100 mt-6 space-y-4">
-            <div className="text-sm text-gray-500 flex justify-between">
-              <span>ស្ថានភាពស្តុក៖</span>
-              <span className={product.quantity > 0 ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
-                {product.quantity > 0 ? `មានទំនិញក្នុងស្តុក (${product.quantity})` : "អស់ពីស្តុក"}
-              </span>
-            </div>
-            
+        {/* កន្លែងរើសចំនួន */}
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-700">ចំនួន:</label>
+          <div className="flex items-center border rounded-lg">
             <button 
-              disabled={product.quantity === 0}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-semibold py-3 rounded-xl transition text-center"
+              onClick={() => setQuantity(q => Math.max(1, q - 1))}
+              className="px-3 py-1 bg-gray-100 hover:bg-gray-200 font-bold"
             >
-              បន្ថែមទៅក្នុងកន្ត្រក
+              -
+            </button>
+            <span className="px-4 py-1 font-semibold">{quantity}</span>
+            <button 
+              onClick={() => setQuantity(q => q + 1)}
+              className="px-3 py-1 bg-gray-100 hover:bg-gray-200 font-bold"
+            >
+              +
             </button>
           </div>
         </div>
+
+        {/* 🛒 ប៊ូតុង បន្ថែមទៅក្នុងកន្ត្រក */}
+        <button
+          onClick={() => addToCart(product.id, quantity)}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 shadow-md"
+        >
+          បន្ថែមទៅក្នុងកន្ត្រក
+        </button>
       </div>
     </div>
   );
