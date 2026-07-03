@@ -1,92 +1,158 @@
-// "use client";
-// import { useEffect, useState } from "react";
-
-// export default function DashboardStats() {
-//   const [stats, setStats] = useState({ total_users: 0, total_items: 0, total_categories: 0, total_value: 0 });
-
-//   useEffect(() => {
-//     fetch("http://127.0.0.1:8000/dashboard/stats", {
-//       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-//     })
-//     .then(res => res.json())
-//     .then(data => setStats(data));
-//   }, []);
-
-//   return (
-//     <div className="space-y-6">
-//       {/* ផ្នែក KPI Cards */}
-//       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-//         <StatCard title="អ្នកប្រើប្រាស់សរុប" value={stats.total_users} trend="+12%" />
-//         <StatCard title="ផលិតផលសរុប" value={stats.total_items} trend="+5%" />
-//         <StatCard title="ប្រភេទផលិតផល" value={stats.total_categories} trend="0%" />
-//         <StatCard title="តម្លៃទំនិញសរុប" value={`$${stats.total_value.toLocaleString()}`} trend="+8%" />
-//       </div>
-
-//       {/* ទីនេះអ្នកអាចបន្ថែម Chart component នៅពេលក្រោយ */}
-//       <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-//         <h3 className="font-bold text-lg mb-4">ទិដ្ឋភាពទូទៅនៃទិន្នន័យ</h3>
-//         <div className="h-40 flex items-center justify-center border-2 border-dashed rounded-lg text-gray-400">
-//           [ក្រាហ្វិកនឹងបង្ហាញនៅទីនេះ]
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// function StatCard({ title, value, trend }: { title: string, value: string | number, trend: string }) {
-//   return (
-//     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
-//       <p className="text-gray-500 text-sm font-medium">{title}</p>
-//       <div className="flex justify-between items-end mt-2">
-//         <h2 className="text-3xl font-black">{value}</h2>
-//         <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded">{trend}</span>
-//       </div>
-//     </div>
-//   );
-// }
-
-
 "use client";
-import { useEffect, useState } from "react";
-import DashboardCharts from "../../components/DashboardCharts"; // Import ក្រាហ្វិកដែលបង្កើតថ្មី
 
-export default function DashboardStats() {
-  const [stats, setStats] = useState({ total_users: 0, total_items: 0, total_categories: 0, total_value: 0 });
+import { useEffect, useState } from "react";
+import {
+  Users,
+  Package,
+  Layers3,
+  DollarSign,
+  TrendingUp,
+} from "lucide-react";
+import DashboardCharts from "@/components/DashboardCharts";
+
+export default function DashboardPage() {
+  const [stats, setStats] = useState({
+    total_users: 0,
+    total_items: 0,
+    total_categories: 0,
+    total_value: 0,
+  });
+
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
-    // ទាញទិន្នន័យ Cards
-    fetch("http://127.0.0.1:8000/dashboard/stats", { /* headers... */ })
-      .then(res => res.json()).then(setStats);
-    
-    // ទាញទិន្នន័យសម្រាប់ Chart
-    fetch("http://127.0.0.1:8000/dashboard/chart-data", { /* headers... */ })
-      .then(res => res.json()).then(setChartData);
+    const headers = {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    };
+
+    Promise.all([
+      fetch("http://127.0.0.1:8000/dashboard/stats", { headers }).then((res) =>
+        res.json()
+      ),
+      fetch("http://127.0.0.1:8000/dashboard/chart-data", {
+        headers,
+      }).then((res) => res.json()),
+    ])
+      .then(([statsData, chart]) => {
+        setStats(statsData);
+        setChartData(chart);
+      })
+      .catch((err) => console.error(err));
   }, []);
 
   return (
-    <div className="space-y-6">
-      {/* ផ្នែក KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title="អ្នកប្រើប្រាស់សរុប" value={stats.total_users} trend="+12%" />
-        <StatCard title="ផលិតផលសរុប" value={stats.total_items} trend="+5%" />
-        <StatCard title="ប្រភេទផលិតផល" value={stats.total_categories} trend="0%" />
-        <StatCard title="តម្លៃទំនិញសរុប" value={`$${stats.total_value.toLocaleString()}`} trend="+8%" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-8">
+      {/* Header */}
+      <div className="mb-10">
+        <h1 className="text-4xl font-extrabold text-slate-800">
+          📊 Dashboard Overview
+        </h1>
+        <p className="text-gray-500 mt-2">
+          Welcome back! Here's your business summary.
+        </p>
       </div>
 
-      {/* បង្ហាញក្រាហ្វិក */}
-      <DashboardCharts data={chartData} />
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+        <StatCard
+          title="អ្នកប្រើប្រាស់"
+          value={stats.total_users}
+          trend="+12%"
+          icon={<Users size={28} />}
+          gradient="from-blue-500 to-cyan-500"
+          badge="bg-blue-100 text-blue-700"
+        />
+
+        <StatCard
+          title="ផលិតផល"
+          value={stats.total_items}
+          trend="+5%"
+          icon={<Package size={28} />}
+          gradient="from-emerald-500 to-green-500"
+          badge="bg-emerald-100 text-emerald-700"
+        />
+
+        <StatCard
+          title="ប្រភេទ"
+          value={stats.total_categories}
+          trend="0%"
+          icon={<Layers3 size={28} />}
+          gradient="from-orange-500 to-amber-500"
+          badge="bg-orange-100 text-orange-700"
+        />
+
+        <StatCard
+          title="តម្លៃសរុប"
+          value={`$${Number(stats.total_value).toLocaleString()}`}
+          trend="+8%"
+          icon={<DollarSign size={28} />}
+          gradient="from-violet-500 to-fuchsia-500"
+          badge="bg-violet-100 text-violet-700"
+        />
+      </div>
+
+      {/* Charts */}
+      <div className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-700 mb-6">
+          📈 Analytics
+        </h2>
+
+        <DashboardCharts data={chartData} />
+      </div>
     </div>
   );
 }
 
-function StatCard({ title, value, trend }: { title: string, value: string | number, trend: string }) {
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  trend: string;
+  icon: React.ReactNode;
+  gradient: string;
+  badge: string;
+}
+
+function StatCard({
+  title,
+  value,
+  trend,
+  icon,
+  gradient,
+  badge,
+}: StatCardProps) {
   return (
-    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition">
-      <p className="text-gray-500 text-sm font-medium">{title}</p>
-      <div className="flex justify-between items-end mt-2">
-        <h2 className="text-3xl font-black">{value}</h2>
-        <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded">{trend}</span>
+    <div className="relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 p-6">
+      {/* Background Decoration */}
+      <div
+        className={`absolute -top-8 -right-8 w-28 h-28 rounded-full bg-gradient-to-r ${gradient} opacity-10`}
+      />
+
+      {/* Icon */}
+      <div
+        className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${gradient} flex items-center justify-center text-white shadow-lg`}
+      >
+        {icon}
+      </div>
+
+      {/* Title */}
+      <p className="mt-6 text-gray-500 font-semibold uppercase tracking-wide">
+        {title}
+      </p>
+
+      {/* Value */}
+      <h2 className="text-4xl font-extrabold text-gray-800 mt-2">
+        {value}
+      </h2>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between mt-6">
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-bold ${badge}`}
+        >
+          {trend}
+        </span>
+
+        <TrendingUp className="text-green-500" size={22} />
       </div>
     </div>
   );
