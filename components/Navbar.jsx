@@ -1,10 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { useTheme } from "@/context/ThemeContext";
 import { useState, useEffect, useRef } from "react";
+import { ShoppingCart, User, LogOut, ChevronDown, Menu, X, Search, Sun, Moon } from "lucide-react";
 
-export default function HeaderContent() {
+export default function Navbar() {
   const { cartCount } = useCart();
+  const { theme, toggleTheme } = useTheme();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -14,131 +17,84 @@ export default function HeaderContent() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUsername = localStorage.getItem("username");
-    if (token) {
-      setIsLoggedIn(true);
-      setUsername(storedUsername || "User");
-    }
-
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
-      }
-    };
+    if (token) { setIsLoggedIn(true); setUsername(storedUsername || "User"); }
+    const handleClickOutside = (e) => { if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false); };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = "/";
-  };
+  const handleLogout = () => { localStorage.removeItem("token"); localStorage.removeItem("username"); window.location.href = "/"; };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+    <header className="sticky top-0 z-50 w-full border-b" style={{ height: "64px", backgroundColor: "var(--navbar)", borderColor: "var(--border)" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-1">
-          <span className="text-3xl font-black text-gray-900 tracking-tighter">K</span>
-          <span className="text-2xl font-light text-gray-400">Store</span>
+        <Link href="/" className="flex items-center gap-2.5 shrink-0">
+          <div className="w-8 h-8 rounded-[var(--radius-lg)] flex items-center justify-center text-white font-semibold text-sm bg-primary">K</div>
+          <span className="text-lg font-semibold hidden sm:block" style={{ color: "var(--heading)" }}>K-Store</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          <Link 
-            href="/store" 
-            className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            ទំព័រដើម
-          </Link>
-          <Link 
-            href="/store/products" 
-            className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            ផលិតផល
-          </Link>
+        {/* Center */}
+        <nav className="hidden md:flex items-center gap-1">
+          <Link href="/store" className="px-3 py-1.5 rounded-[var(--radius-md)] text-sm font-medium hover:bg-[var(--hover-bg)]" style={{ color: "var(--muted)" }}>ទំព័រដើម</Link>
+          <Link href="/store/products" className="px-3 py-1.5 rounded-[var(--radius-md)] text-sm font-medium hover:bg-[var(--hover-bg)]" style={{ color: "var(--muted)" }}>ផលិតផល</Link>
+        </nav>
 
-          <Link href="/store/cart" className="relative p-2 -m-2 rounded-xl hover:bg-gray-100 transition-all group">
-            <span className="text-2xl transition-transform group-hover:scale-110">🛒</span>
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-900 text-[10px] font-medium text-white">
-                {cartCount > 9 ? "9+" : cartCount}
-              </span>
-            )}
+        {/* Right */}
+        <div className="hidden md:flex items-center gap-2">
+          <div className="relative">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--placeholder)" }} />
+            <input type="text" placeholder="ស្វែងរក..." className="pl-9 pr-4 py-2 w-44 lg:w-52 text-sm rounded-[var(--radius-full)] border outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border)", color: "var(--body)" }} />
+          </div>
+
+          <button onClick={toggleTheme} className="p-2 rounded-[var(--radius-full)] hover:bg-[var(--hover-bg)]" aria-label="Toggle theme">
+            {theme === "dark" ? <Sun size={18} className="text-warning" /> : <Moon size={18} style={{ color: "var(--muted)" }} />}
+          </button>
+
+          <Link href="/store/cart" className="relative p-2 rounded-[var(--radius-full)] hover:bg-[var(--hover-bg)]" aria-label="កន្ត្រក">
+            <ShoppingCart size={18} style={{ color: "var(--muted)" }} />
+            {cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full text-[10px] font-bold text-white bg-primary">{cartCount > 9 ? "9+" : cartCount}</span>}
           </Link>
 
           {isLoggedIn ? (
             <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-3 pl-3 pr-4 py-2 rounded-2xl hover:bg-gray-100 transition-all active:scale-95"
-              >
-                <div className="w-8 h-8 bg-gray-900 text-white rounded-2xl flex items-center justify-center text-sm font-semibold shadow">
-                  {username.charAt(0).toUpperCase()}
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-medium text-gray-900 leading-none">{username}</p>
-                  <p className="text-[10px] text-gray-500">គណនី</p>
-                </div>
-                <span className="text-gray-400 text-xl leading-none">▼</span>
+              <button onClick={() => setShowDropdown(!showDropdown)} className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-[var(--radius-full)] hover:bg-[var(--hover-bg)]" aria-label="Menu">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold bg-primary">{username.charAt(0).toUpperCase()}</div>
+                <span className="text-sm font-medium max-w-[72px] truncate" style={{ color: "var(--heading)" }}>{username}</span>
+                <ChevronDown size={14} style={{ color: "var(--muted)" }} />
               </button>
-
               {showDropdown && (
-                <div className="absolute right-0 mt-3 w-56 bg-white border border-gray-100 rounded-3xl shadow-2xl py-3 z-50 overflow-hidden">
-                  <div className="px-5 py-3 border-b border-gray-100">
-                    <p className="font-medium text-gray-900">{username}</p>
-                    <p className="text-sm text-gray-500">កំពុងប្រើប្រាស់</p>
+                <div className="absolute right-0 mt-2 w-52 rounded-[var(--radius-xl)] border py-1 z-50" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", boxShadow: "var(--shadow-xl)" }}>
+                  <div className="px-4 py-3 border-b" style={{ borderColor: "var(--border)" }}>
+                    <p className="text-sm font-semibold" style={{ color: "var(--heading)" }}>{username}</p>
+                    <p className="text-xs" style={{ color: "var(--muted)" }}>គណនីផ្ទាល់ខ្លួន</p>
                   </div>
-                  
-                  <div className="py-2">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-5 py-3 text-red-600 hover:bg-red-50 mx-1 rounded-2xl transition-all font-medium"
-                    >
-                      <span className="text-xl">⭍</span>
-                      ចាកចេញពីគណនី
-                    </button>
-                  </div>
+                  <Link href="/store/cart" onClick={() => setShowDropdown(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-[var(--hover-bg)]" style={{ color: "var(--body)" }}><ShoppingCart size={16} /> កន្ត្រកទំនិញ</Link>
+                  <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-danger hover:bg-danger-light border-t" style={{ borderColor: "var(--border)" }}><LogOut size={16} /> ចាកចេញ</button>
                 </div>
               )}
             </div>
           ) : (
-            <Link 
-              href="/login" 
-              className="bg-gray-900 text-white px-6 py-2.5 rounded-2xl text-sm font-medium hover:bg-black transition-all"
-            >
-              ចូលប្រើប្រាស់
-            </Link>
+            <Link href="/login" className="text-white px-4 py-2 rounded-[var(--radius-full)] text-sm font-medium bg-primary hover:bg-primary-hover shadow-sm">ចូលប្រើប្រាស់</Link>
           )}
-        </nav>
+        </div>
 
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden p-3 text-2xl text-gray-700"
-        >
-          {isMobileMenuOpen ? "✕" : "☰"}
-        </button>
+        {/* Mobile */}
+        <div className="flex items-center gap-1.5 md:hidden">
+          <button onClick={toggleTheme} className="p-2 rounded-[var(--radius-full)]" aria-label="Theme">{theme === "dark" ? <Sun size={18} className="text-warning" /> : <Moon size={18} style={{ color: "var(--muted)" }} />}</button>
+          <Link href="/store/cart" className="relative p-2" aria-label="Cart"><ShoppingCart size={20} style={{ color: "var(--muted)" }} />{cartCount > 0 && <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white bg-primary">{cartCount}</span>}</Link>
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2" style={{ color: "var(--muted)" }} aria-label="Menu">{isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}</button>
+        </div>
       </div>
 
-      {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-6 flex flex-col gap-4">
-          <Link href="/store" className="py-3 px-4 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-2xl">ទំព័រដើម</Link>
-          <Link href="/store/products" className="py-3 px-4 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-2xl">ផលិតផល</Link>
-          <Link href="/store/cart" className="py-3 px-4 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-2xl flex justify-between items-center">
-            កន្ត្រកទំនិញ <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">({cartCount})</span>
-          </Link>
-
-          <div className="h-px bg-gray-100 my-2" />
-
-          {!isLoggedIn ? (
-            <Link href="/login" className="bg-gray-900 text-white py-3.5 rounded-2xl text-center font-medium text-lg">
-              ចូលប្រើប្រាស់
-            </Link>
-          ) : (
-            <button onClick={handleLogout} className="text-red-600 font-medium py-3.5 text-left px-4 hover:bg-red-50 rounded-2xl text-lg flex items-center gap-3">
-              <span className="text-xl">⭍</span> ចាកចេញ
-            </button>
-          )}
+        <div className="md:hidden border-t px-4 py-4 space-y-1" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
+          <Link href="/store" onClick={() => setIsMobileMenuOpen(false)} className="block py-2.5 px-4 rounded-[var(--radius-lg)] text-sm font-medium hover:bg-[var(--hover-bg)]" style={{ color: "var(--body)" }}>ទំព័រដើម</Link>
+          <Link href="/store/products" onClick={() => setIsMobileMenuOpen(false)} className="block py-2.5 px-4 rounded-[var(--radius-lg)] text-sm font-medium hover:bg-[var(--hover-bg)]" style={{ color: "var(--body)" }}>ផលិតផល</Link>
+          <Link href="/store/cart" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between py-2.5 px-4 rounded-[var(--radius-lg)] text-sm font-medium hover:bg-[var(--hover-bg)]" style={{ color: "var(--body)" }}>កន្ត្រកទំនិញ {cartCount > 0 && <span className="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">{cartCount}</span>}</Link>
+          <div className="pt-3 mt-3 border-t" style={{ borderColor: "var(--border)" }}>
+            {isLoggedIn ? <button onClick={handleLogout} className="w-full flex items-center gap-3 py-2.5 px-4 text-sm font-medium text-danger hover:bg-danger-light rounded-[var(--radius-lg)]"><LogOut size={16} /> ចាកចេញ</button> : <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-center text-white py-2.5 rounded-[var(--radius-full)] text-sm font-medium bg-primary">ចូលប្រើប្រាស់</Link>}
+          </div>
         </div>
       )}
     </header>

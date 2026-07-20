@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function EditUserPage() {
   const { id } = useParams();
@@ -9,96 +11,38 @@ export default function EditUserPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // ទាញទិន្នន័យពី Backend
-  useEffect(() => {
-    fetch(`http://127.0.0.1:8000/users/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setForm(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, [id]);
+  useEffect(() => { fetch(`http://127.0.0.1:8000/users/${id}`).then(r => r.json()).then(d => { setForm(d); setLoading(false); }).catch(() => setLoading(false)); }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-
+    e.preventDefault(); setSaving(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/users/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (res.ok) {
-        alert("កែប្រែព័ត៌មានបានជោគជ័យ! ✅");
-        router.push("/admin/users");
-      } else {
-        alert("មានបញ្ហា សូមព្យាយាមម្តងទៀត");
-      }
-    } catch (error) {
-      alert("មិនអាចតភ្ជាប់ទៅ Server បានទេ");
-    } finally {
-      setSaving(false);
-    }
+      const res = await fetch(`http://127.0.0.1:8000/users/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      if (res.ok) router.push("/admin/users"); else alert("មានបញ្ហា");
+    } catch { alert("Server error"); } finally { setSaving(false); }
   };
 
-  if (loading) {
-    return <div className="text-center py-20">កំពុងទាញយកព័ត៌មាន...</div>;
-  }
+  const inputCls = "w-full px-4 py-2.5 text-sm rounded-[var(--radius-lg)] border outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
+  const inputStyle = { backgroundColor: "var(--input-bg)", borderColor: "var(--border)", color: "var(--body)" };
+
+  if (loading) return <div className="max-w-lg mx-auto py-8 space-y-4"><div className="h-8 w-48 rounded-[var(--radius-md)]" style={{ backgroundColor: "var(--hover-bg)" }} /><div className="h-60 rounded-[var(--radius-xl)]" style={{ backgroundColor: "var(--hover-bg)" }} /></div>;
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-10 rounded-3xl shadow border border-gray-100">
-      <h1 className="text-3xl font-semibold text-gray-900 mb-2">កែប្រែព័ត៌មានអ្នកប្រើ</h1>
-      <p className="text-gray-500 mb-8">ID: #{id}</p>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">ឈ្មោះអ្នកប្រើ</label>
-          <input
-            type="text"
-            required
-            className="w-full px-5 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:border-blue-500 transition"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">អ៊ីមែល</label>
-          <input
-            type="email"
-            required
-            className="w-full px-5 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:border-blue-500 transition"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">តួនាទី (Role)</label>
-          <select
-            className="w-full px-5 py-3 border border-gray-200 rounded-2xl focus:outline-none focus:border-blue-500 transition bg-white"
-            value={form.role}
-            onChange={(e) => setForm({ ...form, role: e.target.value })}
-          >
-            <option value="user">User (ធម្មតា)</option>
-            <option value="admin">Admin (អ្នកគ្រប់គ្រង)</option>
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition shadow-lg disabled:opacity-70"
-        >
-          {saving ? "កំពុងរក្សាទុក..." : "អាប់ដេតព័ត៌មាន"}
-        </button>
-      </form>
+    <div className="max-w-lg mx-auto space-y-6">
+      <div className="flex items-center gap-4">
+        <Link href="/admin/users" className="p-2 rounded-[var(--radius-md)] hover:bg-[var(--hover-bg)]" style={{ color: "var(--muted)" }}><ArrowLeft size={18} /></Link>
+        <div><h1 className="text-xl font-semibold" style={{ color: "var(--heading)" }}>កែប្រែអ្នកប្រើ</h1><p className="text-sm" style={{ color: "var(--muted)" }}>ID: #{id}</p></div>
+      </div>
+      <div className="rounded-[var(--radius-xl)] border p-6" style={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div><label className="block text-sm font-medium mb-1.5" style={{ color: "var(--heading)" }}>ឈ្មោះ</label><input type="text" required className={inputCls} style={inputStyle} value={form.username} onChange={e => setForm({...form, username: e.target.value})} /></div>
+          <div><label className="block text-sm font-medium mb-1.5" style={{ color: "var(--heading)" }}>អ៊ីមែល</label><input type="email" required className={inputCls} style={inputStyle} value={form.email} onChange={e => setForm({...form, email: e.target.value})} /></div>
+          <div><label className="block text-sm font-medium mb-1.5" style={{ color: "var(--heading)" }}>តួនាទី</label><select className={inputCls} style={inputStyle} value={form.role} onChange={e => setForm({...form, role: e.target.value})}><option value="user">User</option><option value="admin">Admin</option></select></div>
+          <div className="flex gap-3 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+            <Link href="/admin/users" className="px-4 py-2.5 border rounded-[var(--radius-lg)] text-sm font-medium hover:bg-[var(--hover-bg)]" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>បោះបង់</Link>
+            <button type="submit" disabled={saving} className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-[var(--radius-lg)] text-sm font-medium disabled:opacity-50 shadow-xs">{saving ? "កំពុងរក្សាទុក..." : "អាប់ដេត"}</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

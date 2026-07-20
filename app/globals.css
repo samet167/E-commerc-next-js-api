@@ -1,1 +1,140 @@
 @import "tailwindcss";
+
+/* ====================================
+   K-STORE DESIGN SYSTEM
+   Premium · Soft · Minimal · No Animations
+   Inspired by: Digikala, Apple, Shopify, Vercel
+   ==================================== */
+
+@theme {
+  /* Primary */
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-primary-light: #EFF6FF;
+  --color-primary-soft: #DBEAFE;
+
+  /* Secondary */
+  --color-secondary: #6366F1;
+  --color-secondary-hover: #4F46E5;
+  --color-secondary-light: #EEF2FF;
+
+  /* Accent */
+  --color-accent: #0EA5E9;
+  --color-accent-light: #E0F2FE;
+
+  /* Semantic */
+  --color-success: #22C55E;
+  --color-success-light: #DCFCE7;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FEF3C7;
+  --color-danger: #EF4444;
+  --color-danger-light: #FEE2E2;
+  --color-info: #3B82F6;
+  --color-info-light: #DBEAFE;
+
+  /* Shadows — soft only */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.07), 0 6px 10px rgba(0, 0, 0, 0.03);
+  --shadow-colored: 0 4px 12px rgba(37, 99, 235, 0.15);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+}
+
+/* ====================================
+   LIGHT MODE (Default)
+   Soft gray background, white cards, clear hierarchy
+   ==================================== */
+:root {
+  --bg: #F3F4F6;
+  --bg-section: #F5F5F5;
+  --surface: #F8FAFC;
+  --card: #FFFFFF;
+  --card-hover: #FAFBFC;
+  --navbar: #F9FAFB;
+  --sidebar-bg: #F7F7F8;
+  --sidebar-text: #6B7280;
+  --sidebar-heading: #111827;
+  --sidebar-active-bg: #EFF6FF;
+  --sidebar-active-text: #2563EB;
+  --border: #E5E7EB;
+  --border-light: #D1D5DB;
+  --heading: #111827;
+  --body: #374151;
+  --muted: #6B7280;
+  --placeholder: #9CA3AF;
+  --input-bg: #FFFFFF;
+  --input-border: #E5E7EB;
+  --hover-bg: #F3F4F6;
+  --overlay: rgba(0, 0, 0, 0.3);
+  --img-bg: #F5F5F5;
+}
+
+/* ====================================
+   DARK MODE
+   Deep, comfortable, warm dark tones
+   ==================================== */
+.dark {
+  --bg: #0F1117;
+  --bg-section: #13151C;
+  --surface: #1A1D27;
+  --card: #1E2130;
+  --card-hover: #252838;
+  --navbar: #13151C;
+  --sidebar-bg: #13151C;
+  --sidebar-text: #94A3B8;
+  --sidebar-heading: #F1F5F9;
+  --sidebar-active-bg: rgba(37, 99, 235, 0.1);
+  --sidebar-active-text: #60A5FA;
+  --border: #2A2D3A;
+  --border-light: #1E2130;
+  --heading: #F1F5F9;
+  --body: #D1D5DB;
+  --muted: #9CA3AF;
+  --placeholder: #6B7280;
+  --input-bg: #1A1D27;
+  --input-border: #2A2D3A;
+  --hover-bg: #252838;
+  --overlay: rgba(0, 0, 0, 0.6);
+  --img-bg: #1A1D27;
+}
+
+/* ====================================
+   BASE
+   ==================================== */
+* {
+  border-color: var(--border);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg);
+  color: var(--body);
+  line-height: 1.6;
+}
+
+/* ====================================
+   SCROLLBAR
+   ==================================== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb { background: #374151; }
+
+/* ====================================
+   PRINT
+   ==================================== */
+@media print {
+  header, footer, nav, button, .no-print { display: none !important; }
+  body, html { background: white !important; }
+}

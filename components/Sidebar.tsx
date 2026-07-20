@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Users, Grid, Settings } from "lucide-react";
+import { LayoutDashboard, Package, Users, Grid, Settings, LogOut } from "lucide-react";
 
 const menus = [
   { name: "ផ្ទាំងគ្រប់គ្រង", href: "/admin", icon: LayoutDashboard },
@@ -14,44 +14,48 @@ const menus = [
 export default function Sidebar() {
   const pathname = usePathname();
 
+  const handleLogout = () => { localStorage.removeItem("token"); localStorage.removeItem("username"); window.location.href = "/login"; };
+
   return (
-    <aside className="w-72 bg-slate-900 text-white min-h-screen p-6 flex flex-col">
-      {/* Logo Section */}
-      <div className="flex items-center gap-3 mb-10 px-2">
-        <div className="w-10 h-10 bg-blue-500 rounded-2xl flex items-center justify-center font-bold text-xl">K</div>
-        <div>
-          <h1 className="font-bold text-lg">K-STORE</h1>
-          <p className="text-[10px] text-blue-400 uppercase tracking-widest">Admin Panel</p>
+    <aside className="w-[260px] min-h-screen flex flex-col border-r" style={{ backgroundColor: "var(--sidebar-bg)", borderColor: "var(--border)" }}>
+      {/* Logo */}
+      <div className="px-5 py-5 border-b" style={{ borderColor: "var(--border)" }}>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-primary rounded-[var(--radius-lg)] flex items-center justify-center text-white font-semibold text-sm">K</div>
+          <div>
+            <h1 className="font-semibold text-sm" style={{ color: "var(--sidebar-heading)" }}>K-Store</h1>
+            <p className="text-[10px] font-medium" style={{ color: "var(--muted)" }}>Admin Panel</p>
+          </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-2">
+      <nav className="flex-1 px-3 py-4 space-y-1">
         {menus.map((menu) => {
           const Icon = menu.icon;
           const isActive = pathname === menu.href;
-          
           return (
-            <Link 
-              key={menu.href} 
+            <Link
+              key={menu.href}
               href={menu.href}
-              className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 ${
-                isActive 
-                ? "bg-white text-slate-900 shadow-lg" 
-                : "text-slate-400 hover:bg-slate-800 hover:text-white"
-              }`}
+              className="flex items-center gap-3 px-3.5 py-2.5 rounded-[var(--radius-lg)] text-sm font-medium"
+              style={{
+                backgroundColor: isActive ? "var(--sidebar-active-bg)" : "transparent",
+                color: isActive ? "var(--sidebar-active-text)" : "var(--sidebar-text)",
+              }}
             >
-              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="font-medium text-[15px]">{menu.name}</span>
+              <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+              <span>{menu.name}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Bottom Profile/Logout Section */}
-      <div className="border-t border-slate-800 pt-6 mt-6">
-        <button className="flex items-center gap-4 px-4 py-3 text-slate-400 hover:text-red-400 transition">
-          <span className="text-sm font-medium">ចាកចេញ</span>
+      {/* Logout */}
+      <div className="px-3 py-4 border-t" style={{ borderColor: "var(--border)" }}>
+        <button onClick={handleLogout} className="flex items-center gap-3 px-3.5 py-2.5 rounded-[var(--radius-lg)] text-sm font-medium w-full text-danger hover:bg-danger-light">
+          <LogOut size={18} />
+          <span>ចាកចេញ</span>
         </button>
       </div>
     </aside>
